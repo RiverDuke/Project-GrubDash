@@ -12,8 +12,10 @@ const nextId = require("../utils/nextId");
 const orderExists = (req, res, next) => {
   const { orderId } = req.params;
   const foundOrder = orders.find((order) => order.id === orderId);
+  const index = orders.findIndex((order) => order.id === orderId);
   if (foundOrder) {
     res.locals.order = foundOrder;
+    res.locals.index = index;
     return next();
   }
   next({
@@ -112,7 +114,7 @@ const statusCheck = (req, res, next) => {
 
 const statusPendingCheck = (req, res, next) => {
   const ID = req.params.orderId;
-  const index = orders.findIndex((order) => order.id === ID);
+  const index = res.locals.index;
   if (orders[index].status !== "pending") {
     next({
       status: 400,
@@ -139,7 +141,7 @@ const update = (req, res) => {
   const {
     data: { id, deliverTo, mobileNumber, status, dishes, quantity } = {},
   } = req.body;
-  const index = orders.findIndex((order) => order.id === ID);
+  const index = res.locals.index;
 
   // update the paste
   orders[index].id = ID;
@@ -163,7 +165,7 @@ const list = (req, res, next) => {
 
 const destroy = (req, res) => {
   const { orderId } = req.params;
-  const index = orders.findIndex((order) => order.id === orderId);
+  const index = res.locals.index;
   // `splice()` returns an array of the deleted elements, even if it is one element
   orders.splice(index, 1);
   res.sendStatus(204);

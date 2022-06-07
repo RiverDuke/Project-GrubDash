@@ -11,8 +11,10 @@ const nextId = require("../utils/nextId");
 const dishExists = (req, res, next) => {
   const { dishId } = req.params;
   const foundDish = dishes.find((dish) => dish.id === dishId);
+  const index = dishes.findIndex((dish) => dish.id === dishId);
   if (foundDish) {
     res.locals.dish = foundDish;
+    res.locals.index = index;
     return next();
   }
   next({
@@ -90,7 +92,7 @@ const read = (req, res) => {
 const update = (req, res) => {
   const ID = req.params.dishId;
   const { data: { id, name, description, image_url, price } = {} } = req.body;
-  const index = dishes.findIndex((dish) => dish.id === ID);
+  const index = res.locals.index;
 
   // update the paste
   dishes[index].id = ID;
