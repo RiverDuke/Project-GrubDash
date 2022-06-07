@@ -8,19 +8,20 @@ const nextId = require("../utils/nextId");
 
 // TODO: Implement the /dishes handlers needed to make the tests pass
 
-function dishExists(req, res, next) {
+const dishExists = (req, res, next) => {
   const { dishId } = req.params;
   const foundDish = dishes.find((dish) => dish.id === dishId);
   if (foundDish) {
+    res.locals.dish = foundDish;
     return next();
   }
   next({
     status: 404,
     message: `Dish id not found: ${dishId}`,
   });
-}
+};
 
-function stringCheck(propertyName) {
+const stringCheck = (propertyName) => {
   return function (req, res, next) {
     const { data = {} } = req.body;
     if (data[propertyName]) {
@@ -33,7 +34,7 @@ function stringCheck(propertyName) {
       message: `Dish must include a ${propertyName}`,
     });
   };
-}
+};
 
 const priceCheck = (req, res, next) => {
   const { data: { price } = {} } = req.body;
@@ -64,7 +65,7 @@ const routeBodyMatch = (req, res, next) => {
   }
 };
 
-function create(req, res) {
+const create = (req, res) => {
   const { data: { name, description, price, image_url } = {} } = req.body;
   const newDish = {
     id: nextId(),
@@ -75,18 +76,18 @@ function create(req, res) {
   };
   dishes.push(newDish);
   res.status(201).json({ data: newDish });
-}
+};
 
 const list = (req, res, next) => {
   res.json({ data: dishes });
 };
 
 const read = (req, res) => {
-  const Dish = dishes.find((dish) => dish.id === req.params.dishId);
+  const Dish = res.locals.dish;
   res.json({ data: Dish });
 };
 
-function update(req, res) {
+const update = (req, res) => {
   const ID = req.params.dishId;
   const { data: { id, name, description, image_url, price } = {} } = req.body;
   const index = dishes.findIndex((dish) => dish.id === ID);
@@ -99,7 +100,7 @@ function update(req, res) {
   dishes[index].price = price;
 
   res.json({ data: dishes[index] });
-}
+};
 
 module.exports = {
   list,

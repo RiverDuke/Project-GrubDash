@@ -9,19 +9,20 @@ const nextId = require("../utils/nextId");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
 
-function orderExists(req, res, next) {
+const orderExists = (req, res, next) => {
   const { orderId } = req.params;
   const foundOrder = orders.find((order) => order.id === orderId);
   if (foundOrder) {
+    res.locals.order = foundOrder;
     return next();
   }
   next({
     status: 404,
     message: `Order id not found: ${orderId}`,
   });
-}
+};
 
-function stringCheck(propertyName) {
+const stringCheck = (propertyName) => {
   return function (req, res, next) {
     const { data = {} } = req.body;
     if (data[propertyName]) {
@@ -34,7 +35,7 @@ function stringCheck(propertyName) {
       message: `Dish must include a ${propertyName}`,
     });
   };
-}
+};
 
 const dishCheck = (req, res, next) => {
   const dishes = req.body.data.dishes;
@@ -121,7 +122,7 @@ const statusPendingCheck = (req, res, next) => {
   next();
 };
 
-function create(req, res) {
+const create = (req, res) => {
   const { data: { deliverTo, mobileNumber, dishes } = {} } = req.body;
   const newOrder = {
     id: nextId(),
@@ -131,9 +132,9 @@ function create(req, res) {
   };
   orders.push(newOrder);
   res.status(201).json({ data: newOrder });
-}
+};
 
-function update(req, res) {
+const update = (req, res) => {
   const ID = req.params.orderId;
   const {
     data: { id, deliverTo, mobileNumber, status, dishes, quantity } = {},
@@ -148,11 +149,11 @@ function update(req, res) {
   orders[index].dishes = dishes;
 
   res.json({ data: orders[index] });
-}
+};
 
 const read = (req, res) => {
   const ID = req.params.orderId;
-  const order = orders.find((itr) => itr.id === ID);
+  const order = res.locals.order;
   res.json({ data: order });
 };
 
@@ -160,13 +161,13 @@ const list = (req, res, next) => {
   res.json({ data: orders });
 };
 
-function destroy(req, res) {
+const destroy = (req, res) => {
   const { orderId } = req.params;
   const index = orders.findIndex((order) => order.id === orderId);
   // `splice()` returns an array of the deleted elements, even if it is one element
   orders.splice(index, 1);
   res.sendStatus(204);
-}
+};
 
 module.exports = {
   list,
